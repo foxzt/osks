@@ -18,6 +18,6 @@ $ make
 $ cd ../bin
 $ #测试使用共享内存实现的消息发送和接收程序
 $ ./svshm_sender < infile &
-$ svshm_receiver > out_file
+$ ./svshm_receiver > out_file
 $ #可以使用diff命令检测两个文件的内容是否一样，如果完全一样，则程序运行成功
 ```

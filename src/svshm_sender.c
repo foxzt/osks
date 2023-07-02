@@ -1,36 +1,9 @@
-/*************************************************************************\
-*                  Copyright (C) Michael Kerrisk, 2023.                   *
-*                                                                         *
-* This program is free software. You may use, modify, and redistribute it *
-* under the terms of the GNU General Public License as published by the   *
-* Free Software Foundation, either version 3 or (at your option) any      *
-* later version. This program is distributed without any warranty.  See   *
-* the file COPYING.gpl-v3 for details.                                    *
-\*************************************************************************/
-
-/* Listing 48-2 */
-
 /*  svshm_xfr_writer.c
-
-   Read buffers of data from standard input into a System V shared memory
-   segment from which it is copied by svshm_xfr_reader.c
-
-   We use a pair of binary semaphores to ensure that the writer and reader have
-   exclusive, alternating access to the shared memory. (I.e., the writer writes
-   a block of text, then the reader reads, then the writer writes etc). This
-   ensures that each block of data is processed in turn by the writer and
-   reader.
-
-   This program needs to be started before the reader process as it creates the
-   shared memory and semaphores used by both processes.
-
-   Together, these two programs can be used to transfer a stream of data through
-   shared memory as follows:
-
-        $ svshm_xfr_writer < infile &
-        $ svshm_xfr_reader > out_file
+        往共享内存中写入信息
+        $ svshm_sender < infile &
+        $ svshm_receiver > out_file
 */
-#include "semun.h"              /* Definition of semun union */
+#include "semun.h"              /* 定义 semun 联合体 */
 #include "svshm_hdr_file.h"
 
 int
@@ -40,8 +13,7 @@ main(int argc, char *argv[])
     struct shmseg *shmp;
     union semun dummy;
 
-    /* Create set containing two semaphores; initialize so that
-       writer has first access to shared memory. */
+    /* 创建一个包含两个信号量的信号量集，做好初始化，以保证发送程序先访问共享内存 */
 
     semid = semget(SEM_KEY, 2, IPC_CREAT | OBJ_PERMS);
     if (semid == -1)
@@ -52,7 +24,7 @@ main(int argc, char *argv[])
     if (initSemInUse(semid, READ_SEM) == -1)
         errExit("initSemInUse");
 
-    /* Create shared memory; attach at address chosen by system */
+    /* 创建共享内存，将其附加到程序虚拟内存地址空间 */
 
     shmid = shmget(SHM_KEY, sizeof(struct shmseg), IPC_CREAT | OBJ_PERMS);
     if (shmid == -1)
@@ -62,28 +34,26 @@ main(int argc, char *argv[])
     if (shmp == (void *) -1)
         errExit("shmat");
 
-    /* Transfer blocks of data from stdin to shared memory */
+    /* 从stdin读取的数据转换成自定义数据块 */
 
     for (xfrs = 0, bytes = 0; ; xfrs++, bytes += shmp->cnt) {
-        if (reserveSem(semid, WRITE_SEM) == -1)         /* Wait for our turn */
+        if (reserveSem(semid, WRITE_SEM) == -1)         /* 进行写操作前对写信号量做P操作 */
             errExit("reserveSem");
 
         shmp->cnt = read(STDIN_FILENO, shmp->buf, BUF_SIZE);
         if (shmp->cnt == -1)
             errExit("read");
 
-        if (releaseSem(semid, READ_SEM) == -1)          /* Give reader a turn */
+        if (releaseSem(semid, READ_SEM) == -1)          /* 都信号量V操作 */
             errExit("releaseSem");
 
-        /* Have we reached EOF? We test this after giving the reader
-           a turn so that it can see the 0 value in shmp->cnt. */
+        /* 当读到EOF代表读入结束，将cnt设置成0 */
 
         if (shmp->cnt == 0)
             break;
     }
 
-    /* Wait until reader has let us have one more turn. We then know
-       reader has finished, and so we can delete the IPC objects. */
+    /* 对读信号量做P操作，确保接收程序最后一次访问共享内存成功前不删除共享内存 */
 
     if (reserveSem(semid, WRITE_SEM) == -1)
         errExit("reserveSem");

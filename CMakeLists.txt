@@ -18,22 +18,22 @@ set(LIB_SOURCES
 add_library(mylib STATIC ${LIB_SOURCES})
 
 
-add_executable(main test/main.cpp)
-add_dependencies(main mylib)
-target_link_libraries(main mylib)
+add_executable(test test/main.cpp)
+add_dependencies(test mylib)
+target_link_libraries(test mylib)
 
-add_executable(sender src/svshm_sender.c src/binary_sems.c)
-add_dependencies(sender mylib)
-target_link_libraries(sender mylib)
+add_executable(svshm_sender src/svshm_sender.c src/binary_sems.c)
+add_dependencies(svshm_sender mylib)
+target_link_libraries(svshm_sender mylib)
 
-add_executable(receiver src/svshm_receiver.c src/binary_sems.c)
-add_dependencies(receiver mylib)
-target_link_libraries(receiver mylib)
+add_executable(svshm_receiver src/svshm_receiver.c src/binary_sems.c)
+add_dependencies(svshm_receiver mylib)
+target_link_libraries(svshm_receiver mylib)
 
-add_executable(fser src/svmsg_sender.c)
-add_dependencies(fser mylib)
-target_link_libraries(fser mylib)
+add_executable(svmsg_sender src/svmsg_sender.c)
+add_dependencies(svmsg_sender mylib)
+target_link_libraries(svmsg_sender mylib)
 
-add_executable(fcli src/svmsg_receiver.c)
-add_dependencies(fcli mylib)
-target_link_libraries(fcli mylib)
+add_executable(svmsg_receiver src/svmsg_receiver.c)
+add_dependencies(svmsg_receiver mylib)
+target_link_libraries(svmsg_receiver mylib)

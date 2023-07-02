@@ -10,9 +10,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "get_num.h"    /* 用于处理数字参数的函数 */
+#include "lib/get_num.h"    /* 用于处理数字参数的函数 */
 
-#include "error_functions.h"  /* 包装错误处理函数 */
+#include "lib/error_functions.h"  /* 包装错误处理函数 */
 
 
 #ifdef TRUE

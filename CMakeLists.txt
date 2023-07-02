@@ -12,8 +12,8 @@ file(MAKE_DIRECTORY ${MY_BIN_OUTPUT_DIRECTORY})
 set(EXECUTABLE_OUTPUT_PATH ${MY_BIN_OUTPUT_DIRECTORY})
 
 set(LIB_SOURCES
-        src/get_num.c
-        src/error_functions.c
+        src/lib/get_num.c
+        src/lib/error_functions.c
         )
 add_library(mylib STATIC ${LIB_SOURCES})
 

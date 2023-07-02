@@ -3,7 +3,7 @@
 */
 #include <stdarg.h>
 #include "error_functions.h"
-#include "myhdr.h"
+#include "../myhdr.h"
 #include "ename.c.inc"          /* Defines ename and MAX_ENAME */
 
 NORETURN
